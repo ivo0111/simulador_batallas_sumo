@@ -1,0 +1,80 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+IMPORTABLE EXTERNPROTO "../protos/SumoBot.proto"
+
+WorldInfo {
+  contactProperties [
+    ContactProperties {
+      material1 "robot"
+      material2 "robot"
+      rollingFriction 0.5 0.5 0.5
+      bounce 0
+      bounceVelocity 0.001
+      softCFM 0.0001
+      maxContactJoints 13
+    }
+    ContactProperties {
+      material1 "robot"
+      material2 "ground"
+      coulombFriction [
+        0.9
+      ]
+      softCFM 0.0001
+    }
+  ]
+}
+Viewpoint {
+  orientation 0.1958250494707985 -0.041903824025184 -0.9797431395686451 3.5548946893734636
+  position 1.8973701308818756 -0.9576953817206295 0.9040181985026383
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+DEF Arena Solid {
+  translation 0 0 0.03
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColorMap ImageTexture {
+          url [
+            "textures/dohyo.PNG"
+          ]
+          repeatS FALSE
+          repeatT FALSE
+        }
+        roughness 0.5
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.05
+        radius 0.77
+        subdivision 60
+      }
+    }
+  ]
+  contactMaterial "ground"
+  boundingObject Cylinder {
+    height 0.05
+    radius 0.77
+    side FALSE
+    subdivision 60
+  }
+  locked TRUE
+}
+Robot {
+  name "sumo_supervisor"
+  controller "supervisor"
+  supervisor TRUE
+}
+DEF robot_A SumoBot {
+  translation 0 0.55 0.12
+}
+DEF robot_B SumoBot {
+  translation 0 -0.39 0.12
+  rotation 0 0 1 3.14159
+  name "robot_B"
+  color 0 0 0.498039
+}
