@@ -2,9 +2,13 @@ const express = require('express');
 const { spawn } = require('child_process');
 const net = require('net');
 const WebSocket = require('ws');
+const cors = require('cors');
 
 const app = express();
-app.use(express.json());
+
+app.use(express.json(), cors({
+    origin: 'http://localhost:5173'
+}));
 
 const HTTP_PORT = 3000;
 const WS_PORT = 3001;
@@ -14,6 +18,22 @@ let tcpClient = null;
 let currentPort = 54000;
 
 const wss = new WebSocket.Server({ port: WS_PORT });
+
+wss.on('data', (data) => {
+    console.log('DATA:', data.toString());
+});
+
+wss.on('end', () => {
+    console.log('TCP connection ended');
+});
+
+wss.on('close', () => {
+    console.log('TCP connection closed');
+});
+
+wss.on('error', (err) => {
+    console.error('TCP error', err);
+});
 
 function broadcast(data) {
     const msg = JSON.stringify(data);
@@ -27,12 +47,10 @@ function broadcast(data) {
 function launchEngine(port) {
     return new Promise((resolve, reject) => {
         const command = `"webots"`; // ruta a webots.exe (o webots si está en PATH)
-        const args = [
+        const args = [ // TODO: ajustar para usar shell false
             '--batch',
-            '--mode=fast',
-            '--no-rendering',
-            '.\\Sumo_webots\\worlds\\Simulador_Peleas_Sumo.wbt', // ruta al .wbt de webots
-            `--port=${port}`
+            // '--mode=fast',
+            '..\\Sumo_webots\\worlds\\Simulador_Peleas_Sumo.wbt', // ruta al .wbt de webots
         ];
 
         webotsProcess = spawn(command, args, {
@@ -40,7 +58,12 @@ function launchEngine(port) {
             windowsHide: true
         });
 
+        webotsProcess.on('error', (err) => {
+            console.error('Child process error', err);
+        });
+
         webotsProcess.on('exit', (code) => {
+            console.log('Engine exited with code', code);
             broadcast({ type: 'ENGINE_EXIT', code });
         });
 
@@ -60,6 +83,7 @@ function connectTCP(port) {
         let buffer = '';
 
         tcpClient.on('data', (data) => {
+            console.log('Received TCP data:', data.toString());
             buffer += data.toString();
 
             let lines = buffer.split('\n');

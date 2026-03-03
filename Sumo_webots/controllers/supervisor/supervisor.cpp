@@ -45,7 +45,6 @@ public:
 
         robotA = supervisor->getFromDef("robot_A");
         robotB = supervisor->getFromDef("robot_B");
-        port = port_arg;
 
         roundsToWin = 2; // mejor de 3
         roundTimeLimit = 60.0;
@@ -98,6 +97,7 @@ private:
     WSADATA wsaData;
     SOCKET serverSocket = INVALID_SOCKET;
     SOCKET clientSocket = INVALID_SOCKET;
+    int port;
 
     bool clientConnected = false;
     int roundsToWin;
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
     int port = 54000;
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
-
+        std::cout << "Arg: " << arg << std::endl;
         if (arg.rfind("--port=", 0) == 0) {
             try {
                 port = std::stoi(arg.substr(7));
