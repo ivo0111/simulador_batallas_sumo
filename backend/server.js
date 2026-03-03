@@ -67,46 +67,67 @@ function launchEngine(port) {
             broadcast({ type: 'ENGINE_EXIT', code });
         });
 
-        setTimeout(() => resolve(), 2000);
+        resolve();
     });
 }
 
-function connectTCP(port) {
+function connectTCP(port, maxRetries = 20, delay = 500) {
     return new Promise((resolve, reject) => {
-        tcpClient = new net.Socket();
+        let attempts = 0;
 
-        tcpClient.connect(port, '127.0.0.1', () => {
-            console.log('Connected to engine TCP');
-            resolve();
-        });
+        function tryConnect() {
+            attempts++;
+            console.log(`TCP connection attempt ${attempts}/${maxRetries}...`);
 
-        let buffer = '';
+            const socket = new net.Socket();
 
-        tcpClient.on('data', (data) => {
-            console.log('Received TCP data:', data.toString());
-            buffer += data.toString();
+            socket.connect(port, '127.0.0.1', () => {
+                console.log('Connected to engine TCP');
+                tcpClient = socket;
 
-            let lines = buffer.split('\n');
-            buffer = lines.pop();
+                let buffer = '';
 
-            for (let line of lines) {
-                if (line.trim().length === 0) continue;
-                try {
-                    const parsed = JSON.parse(line);
-                    broadcast({ type: 'MATCH_EVENT', payload: parsed });
-                } catch (e) {
-                    console.error('Invalid JSON from engine:', line);
+                socket.on('data', (data) => {
+                    console.log('Received TCP data:', data.toString());
+                    buffer += data.toString();
+
+                    let lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (let line of lines) {
+                        if (line.trim().length === 0) continue;
+                        try {
+                            const parsed = JSON.parse(line);
+                            broadcast({ type: 'MATCH_EVENT', payload: parsed });
+                        } catch (e) {
+                            console.error('Invalid JSON from engine:', line);
+                        }
+                    }
+                });
+
+                socket.on('close', () => {
+                    broadcast({ type: 'ENGINE_DISCONNECTED' });
+                });
+
+                resolve();
+            });
+
+            socket.on('error', (err) => {
+                socket.destroy();
+
+                if (attempts >= maxRetries) {
+                    reject(new Error(`Could not connect to TCP after ${maxRetries} attempts: ${err.message}`));
+                    return;
                 }
-            }
-        });
 
-        tcpClient.on('close', () => {
-            broadcast({ type: 'ENGINE_DISCONNECTED' });
-        });
+                // Backoff exponencial con tope en 3s
+                const wait = Math.min(delay * Math.pow(1.5, attempts - 1), 3000);
+                console.log(`Retrying in ${Math.round(wait)}ms...`);
+                setTimeout(tryConnect, wait);
+            });
+        }
 
-        tcpClient.on('error', (err) => {
-            console.error(err);
-        });
+        tryConnect();
     });
 }
 
