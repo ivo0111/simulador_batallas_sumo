@@ -49,6 +49,7 @@ function launchEngine(port) {
         const command = `"webots"`; // ruta a webots.exe (o webots si está en PATH)
         const args = [ // TODO: ajustar para usar shell false
             '--batch',
+            '--no-rendering',
             // '--mode=fast',
             '..\\Sumo_webots\\worlds\\Simulador_Peleas_Sumo.wbt', // ruta al .wbt de webots
         ];
