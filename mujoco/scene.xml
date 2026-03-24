@@ -1,0 +1,13 @@
+<!-- scene.xml -->
+<mujoco model="sumo_scene">
+
+    <option timestep="0.001"
+        gravity="0 0 -9.81"
+        impratio="10"
+        iterations="50"
+        tolerance="1e-10" />
+
+    <include file="./components/arena.xml" />
+    <include file="./components/sumobot.xml" />
+
+</mujoco>

@@ -1,0 +1,79 @@
+<mujoco>
+    <asset>
+        <mesh name="rampa_mesh" file="../assets/rampa.stl" scale="1 1 1" />
+    </asset>
+
+    <default>
+        <default class="wheel">
+            <geom type="cylinder" friction="1.2 0.01 0.01" condim="4" rgba="0 0 0 1" />
+        </default>
+        <default class="robot_body">
+            <geom friction="0.5 0.005 0.001" condim="4" solref="0.004 1" solimp="0.95 0.99 0.001"/>
+        </default>
+    </default>
+
+    <worldbody>
+        <body name="robot_A" pos="0 0.55 0.12">
+            
+            <freejoint name="robot_A_root"/>
+
+            <!-- Cuerpo principal -->
+            <geom name="robot_A_body"
+                class="robot_body"
+                type="box"
+                size="0.1 0.1 0.05"
+                rgba="0.667 0 0 1" />
+
+            <!-- Rampa (mesh STL) -->
+            <geom name="robot_A_rampa"
+                class="robot_body"
+                type="mesh"
+                mesh="rampa_mesh"
+                rgba="0.4 0.4 0.4 1" />
+
+            <!-- Rueda izquierda -->
+            <body name="robot_A_wheel_left" pos="0.115 0.1 -0.01">
+                <joint name="robot_A_left_wheel_joint"
+                    type="hinge"
+                    axis="1 0 0"
+                    damping="0.01" />
+                <geom class="wheel"
+                    type="cylinder"
+                    size="0.05 0.015"
+                    euler="0 90 0" />
+            </body>
+
+            <!-- Rueda derecha -->
+            <body name="robot_A_wheel_right" pos="-0.115 0.09 -0.01">
+                <joint name="robot_A_right_wheel_joint"
+                    type="hinge"
+                    axis="1 0 0"
+                    damping="0.01" />
+                <geom class="wheel"
+                    type="cylinder"
+                    size="0.05 0.015"
+                    euler="0 90 0" />
+            </body>
+
+            <!-- Patín delantero (rueda libre omnidireccional) -->
+            <body name="robot_A_caster" pos="0 -0.1 -0.05">
+                <joint name="robot_A_caster_joint" type="ball" damping="0.001" />
+                <geom type="sphere"
+                    size="0.01"
+                    friction="0.01 0.001 0.001"
+                    rgba="0.667 0 0 1" />
+            </body>
+
+        </body>
+    </worldbody>
+
+    <actuator>
+        <!-- velocity: controlás directamente la velocidad angular de cada rueda -->
+        <velocity name="robot_A_left"
+            joint="robot_A_left_wheel_joint"
+            kv="1" />
+        <velocity name="robot_A_right"
+            joint="robot_A_right_wheel_joint"
+            kv="1" />
+    </actuator>
+</mujoco>
