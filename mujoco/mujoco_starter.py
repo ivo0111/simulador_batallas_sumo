@@ -1,5 +1,6 @@
 import mujoco
 import mujoco.viewer
+import time
 
 with open("scene.xml") as f:
     xml = f.read()
@@ -15,18 +16,18 @@ for i in range(model.njnt):
     print(f"Joint {i}: '{name}' → DOF {dof_adr}")
 
 with mujoco.viewer.launch_passive(model, data) as viewer:
-    t = 0
+    sim_time = 0.0
+    real_start = time.time()
+
     while viewer.is_running():
-        t += model.opt.timestep
+        # Cuánto tiempo real pasó
+        real_elapsed = time.time() - real_start
+        
+        # Correr steps hasta alcanzar el tiempo real
+        while sim_time < real_elapsed:
+            data.ctrl[0] = 5
+            data.ctrl[1] = 5
+            mujoco.mj_step(model, data)
+            sim_time += model.opt.timestep
 
-        if t < 2.0:
-            # Avanza recto
-            data.ctrl[0] = 8.0
-            data.ctrl[1] = 8.0
-        else:
-            # Gira
-            data.ctrl[0] = 8.0
-            data.ctrl[1] = -8.0
-
-        mujoco.mj_step(model, data)
         viewer.sync()

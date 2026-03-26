@@ -1,4 +1,4 @@
-<mujoco model="sumo_arena">
+<mujoco>
 
     <default>
         <!-- suelo -->
@@ -7,15 +7,24 @@
         </default>
     </default>
 
+    <asset>
+        <texture name="dohyo_tex"
+            type="2d"
+            file="../assets/dohyo.PNG" />
+        <material name="dohyo_mat"
+            texture="dohyo_tex"
+            texuniform="false" />
+    </asset>
+
     <worldbody>
-        <!-- Luz -->
-        <light pos="0 0 3" dir="0 0 -1" diffuse="1 1 1"/>
         <body name="arena" pos="0 0 0.03">
             <geom name="dohyo_surface"
-            type="cylinder"
-            size="0.77 0.025"
-            class="ground"
-            rgba="0.15 0.15 0.15 1"/>
+                type="cylinder"
+                size="0.77 0.025"
+                class="ground"
+                material="dohyo_mat" />
         </body>
+
     </worldbody>
+
 </mujoco>

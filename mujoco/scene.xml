@@ -1,4 +1,3 @@
-<!-- scene.xml -->
 <mujoco model="sumo_scene">
 
     <option timestep="0.001"
@@ -7,7 +6,24 @@
         iterations="50"
         tolerance="1e-10" />
 
-    <include file="./components/arena.xml" />
-    <include file="./components/sumobot.xml" />
+    <!-- robot.xml se referencia como asset primero -->
+    <asset>
+        <model name="robot_model" file="./components/sumobot.xml" />
+        <model name="arena_model" file="./components/arena.xml" />
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 3" dir="0 0 -1" diffuse="1 1 1"/>
+        <body pos="0 0 0.5">
+            <joint type="free"/>
+            <geom type="sphere" size="0.1 0.1 0.1" rgba="0.8 0.8 0.8 1" mass="10" />
+        </body>
+        <!-- Arena -->
+        <attach model="arena_model" body="arena" prefix="_" />
+
+        <!-- Robot A -->
+        <attach model="robot_model" body="robot" prefix="A_" />
+
+    </worldbody>
 
 </mujoco>
