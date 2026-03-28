@@ -8,14 +8,31 @@
             <geom type="cylinder" friction="1.2 0.01 0.01" condim="4" rgba="0 0 0 1" />
         </default>
         <default class="robot_body">
-            <geom friction="0.5 0.005 0.001" condim="4" solref="0.004 1" solimp="0.95 0.99 0.001"/>
+            <geom friction="0.5 0.005 0.001" condim="4" solref="0.004 1" solimp="0.95 0.99 0.001" />
         </default>
     </default>
 
     <worldbody>
         <body name="robot" pos="0 0.55 0.12">
-            
-            <freejoint name="robot_root"/>
+
+            <!-- Sites para sensores IR -->
+            <site name="line_left"
+                pos="0.05 -0.11 -0.052"
+                size="0.005"
+                rgba="1 1 0 1" />
+
+            <site name="line_right"
+                pos="-0.05 -0.11 -0.052"
+                size="0.005"
+                rgba="1 1 0 1" />
+
+            <site name="front_ir"
+                pos="0 -0.15 0"
+                size="0.005"
+                rgba="0 1 0 1" />
+
+            <!-- Permite movimiento libre -->
+            <freejoint name="robot_root" />
 
             <!-- Cuerpo principal -->
             <geom name="robot_body"

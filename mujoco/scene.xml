@@ -19,7 +19,7 @@
             <geom type="sphere" size="0.1 0.1 0.1" rgba="0.8 0.8 0.8 1" mass="10" />
         </body>
         <!-- Arena -->
-        <attach model="arena_model" body="arena" prefix="_" />
+        <attach model="arena_model" body="arena" prefix="" />
 
         <!-- Robot A -->
         <attach model="robot_model" body="robot" prefix="A_" />
