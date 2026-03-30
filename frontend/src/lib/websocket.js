@@ -1,25 +1,20 @@
-import { matchState } from './stores.js';
+import { simState } from './stores.js';
 
 let socket = null;
 
 export function connectWebSocket() {
-    socket = new WebSocket('ws://localhost:3001');
+    socket = new WebSocket('ws://localhost:8000/ws');
 
-    socket.onopen = () => {
-        console.log('Connected to backend');
-    };
+    socket.onopen = () => console.log('Conectado a MuJoCo');
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-
-        if (data.type === 'MATCH_EVENT') {
-            matchState.set(data.payload);
+        if (data.type === 'SIM_STATE') {
+            simState.set(data);
         }
     };
 
-    socket.onclose = () => {
-        console.log('WebSocket closed');
-    };
+    socket.onclose = () => console.log('WebSocket cerrado');
 }
 
 export function closeWebSocket() {
