@@ -154,6 +154,7 @@ export class SceneManager {
     }
 
     updateBodies(simState) {
+        if (!simState.bodies) return
         for (const [id, bodyData] of Object.entries(simState.bodies)) {
             const group = this.bodies.get(id)
             if (!group) continue

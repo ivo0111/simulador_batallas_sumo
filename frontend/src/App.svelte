@@ -1,15 +1,9 @@
 <script>
-  import { onMount } from "svelte";
-  import { simState } from "./lib/stores";
-  import { connectWebSocket } from "./lib/websocket";
+  import { onMount } from 'svelte'
+  import { connectWebSocket } from './lib/websocket.js'
+  import SimView from './components/SimView.svelte'
 
-  let state;
-  simState.subscribe(v => state = v);
-
-  onMount(() => connectWebSocket());
+  onMount(() => connectWebSocket())
 </script>
 
-<main>
-  <h1>MuJoCo Sumo</h1>
-  <pre>{JSON.stringify(state, null, 2)}</pre>
-</main>
+<SimView />
