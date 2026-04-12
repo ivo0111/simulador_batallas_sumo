@@ -3,6 +3,7 @@
     import { simState, sceneInitState } from "../lib/stores.js";
     import { SceneManager } from "../lib/three/SceneManager.js";
     import { buildSceneDescription } from "../lib/three/RobotBuilder.js";
+    import { get } from 'svelte/store'
 
     let canvas;
     let sceneManager;
@@ -22,6 +23,11 @@
 
     onMount(() => {
         sceneManager = new SceneManager(canvas);
+
+        const data = get(sceneInitState)
+        if (data?.scene) {
+            sceneManager.buildBodies(buildSceneDescription(data))
+        }
     });
 
     onDestroy(() => {
