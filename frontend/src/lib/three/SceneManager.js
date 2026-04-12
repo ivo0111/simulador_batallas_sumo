@@ -108,7 +108,7 @@ export class SceneManager {
                 )
                 // Mismo problema de ejes que el dohyo
                 const cyl = new THREE.Mesh(geo, mat)
-                cyl.rotation.x = Math.PI / 2
+                cyl.rotation.y = Math.PI / 2
                 return cyl
 
             case 'mesh':
@@ -143,8 +143,7 @@ export class SceneManager {
                 mesh.position.set(geom.pos[0], geom.pos[1], geom.pos[2])
                 // MuJoCo usa quaternion en orden [w, x, y, z]
                 // Three.js usa [x, y, z, w] — hay que reordenar
-                mesh.quaternion.set(geom.quat[1], geom.quat[2], geom.quat[3], geom.quat[0])
-
+                mesh.quaternion.set(geom.quat[1], geom.quat[3], geom.quat[2], geom.quat[0])
                 group.add(mesh)
             }
 
@@ -154,18 +153,18 @@ export class SceneManager {
     }
 
     updateBodies(bodies) {
-    if (!bodies) return
-    for (const [id, bodyData] of Object.entries(bodies)) {  // bodies, no bodies.bodies
-        const group = this.bodies.get(id)
-        if (!group) continue
+        if (!bodies) return
+        for (const [id, bodyData] of Object.entries(bodies)) {  // bodies, no bodies.bodies
+            const group = this.bodies.get(id)
+            if (!group) continue
 
-        group.position.set(bodyData.pos[0], bodyData.pos[1], bodyData.pos[2])
-        group.quaternion.set(
-            bodyData.quat[1],
-            bodyData.quat[2],
-            bodyData.quat[3],
-            bodyData.quat[0]
-        )
-    }
+            group.position.set(bodyData.pos[0], bodyData.pos[1], bodyData.pos[2])
+            group.quaternion.set(
+                bodyData.quat[1],
+                bodyData.quat[2],
+                bodyData.quat[3],
+                bodyData.quat[0]
+            )
+        }
 }
 }
