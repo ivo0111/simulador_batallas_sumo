@@ -26,6 +26,7 @@ function parseGeom(g) {
         pos: g.pos,
         quat: g.quat,
         rgba: g.rgba,
+        material: g.material ?? null,  // ← faltaba esto
     }
 
     switch (g.type) {
