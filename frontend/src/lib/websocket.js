@@ -1,4 +1,4 @@
-import { simState } from './stores.js';
+import { simState, sceneInitState } from './stores.js';
 
 let socket = null;
 
@@ -9,7 +9,11 @@ export function connectWebSocket() {
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.type === 'SIM_STATE') {
+
+        if (data.type === 'SCENE_INIT') {
+            console.log('Bodies en SCENE_INIT:', data.scene.bodies.map(b => b.name))
+            sceneInitState.set(data);
+        } else if (data.type === 'SIM_STATE') {
             simState.set(data);
         }
     };
