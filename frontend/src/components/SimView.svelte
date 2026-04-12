@@ -9,7 +9,7 @@
 
     // Cuando llega SCENE_INIT, construimos la escena una sola vez
     const unsubscribeInit = sceneInitState.subscribe((data) => {
-        if (!data?.bodies || !sceneManager) return;
+        if (!data?.scene || !sceneManager) return;
         const description = buildSceneDescription(data);
         sceneManager.buildBodies(description);
     });

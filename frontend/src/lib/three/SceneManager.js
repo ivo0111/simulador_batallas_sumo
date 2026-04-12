@@ -55,7 +55,7 @@ export class SceneManager {
     _buildDohyo() {
         // Cilindro: radiusTop, radiusBottom, height, segments
         const geo = new THREE.CylinderGeometry(0.77, 0.77, 0.05, 64)
-        const tex = new THREE.TextureLoader().load('/assets/dohyo.PNG')
+        const tex = new THREE.TextureLoader().load('http://localhost:8000/assets/dohyo.PNG')
         const mat = new THREE.MeshStandardMaterial({ map: tex })
         const mesh = new THREE.Mesh(geo, mat)
 
@@ -153,20 +153,19 @@ export class SceneManager {
         }
     }
 
-    updateBodies(simState) {
-        if (!simState.bodies) return
-        for (const [id, bodyData] of Object.entries(simState.bodies)) {
-            const group = this.bodies.get(id)
-            if (!group) continue
+    updateBodies(bodies) {
+    if (!bodies) return
+    for (const [id, bodyData] of Object.entries(bodies)) {  // bodies, no bodies.bodies
+        const group = this.bodies.get(id)
+        if (!group) continue
 
-            group.position.set(...bodyData.pos)
-            // Reordenar quaternion MuJoCo [w,x,y,z] → Three.js [x,y,z,w]
-            group.quaternion.set(
-                bodyData.quat[1],
-                bodyData.quat[2],
-                bodyData.quat[3],
-                bodyData.quat[0]
-            )
-        }
+        group.position.set(bodyData.pos[0], bodyData.pos[1], bodyData.pos[2])
+        group.quaternion.set(
+            bodyData.quat[1],
+            bodyData.quat[2],
+            bodyData.quat[3],
+            bodyData.quat[0]
+        )
     }
+}
 }
