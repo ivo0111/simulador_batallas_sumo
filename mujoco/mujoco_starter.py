@@ -96,8 +96,8 @@ def controller():
         data.ctrl[0] = -0.1
         data.ctrl[1] = -0.1
     elif enemy:
-        data.ctrl[0] =  0.15
-        data.ctrl[1] =  0.15
+        data.ctrl[0] =  2
+        data.ctrl[1] =  2
     else:
         data.ctrl[0] =  0.04
         data.ctrl[1] = -0.04

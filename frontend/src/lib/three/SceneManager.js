@@ -43,10 +43,10 @@ export class SceneManager {
         this._startLoop()
     }
 
-    _loadSTL(src, mat, group) {
-        new STLLoader().load(src, geometry => {
+    _loadSTL(src, mat) {
+        const url = `http://localhost:8000${src}`
+        new STLLoader().load(url, geometry => {
             const mesh = new THREE.Mesh(geometry, mat)
-            // Buscar el group del body A_robot y agregarle el mesh
             const robotGroup = this.bodies.get('A_robot')
             if (robotGroup) robotGroup.add(mesh)
         })
@@ -154,7 +154,7 @@ export class SceneManager {
 
     updateBodies(bodies) {
         if (!bodies) return
-        for (const [id, bodyData] of Object.entries(bodies)) {  // bodies, no bodies.bodies
+        for (const [id, bodyData] of Object.entries(bodies)) { 
             const group = this.bodies.get(id)
             if (!group) continue
 
