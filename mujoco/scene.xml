@@ -22,7 +22,14 @@
         <attach model="arena_model" body="arena" prefix="" />
 
         <!-- Robot A -->
-        <attach model="robot_model" body="robot" prefix="A_" />
+        <frame pos="0 0.4 0.11" euler="0 0 0">
+            <attach model="robot_model" body="robot" prefix="A_"/>
+        </frame>
+
+        <!-- Robot B -->
+        <frame pos="0 -0.4 0.11" euler="0 0 180">
+            <attach model="robot_model" body="robot" prefix="B_"/>
+        </frame>
 
     </worldbody>
 

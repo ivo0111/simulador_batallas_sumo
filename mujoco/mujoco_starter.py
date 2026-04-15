@@ -7,15 +7,25 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from fastapi.staticfiles import StaticFiles
+from robots import Sumobot
 
 # Cargar modelo
 model = mujoco.MjModel.from_xml_path("scene.xml")
 data  = mujoco.MjData(model)
 
-# IDs de sensores
-id_line_left  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_line_left")
-id_line_right = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_line_right")
-id_front_ir   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_front_ir")
+#* IDs de sensores
+
+# Robot A
+A_id_line_left  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_line_left")
+A_id_line_right = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_line_right")
+A_id_front_ir   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_front_ir")
+
+# Robot B
+B_id_line_left  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "B_line_left")
+B_id_line_right = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "B_line_right")
+B_id_front_ir   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "B_front_ir")
+
+# Dohyo
 id_dohyo      = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "dohyo_surface")
 
 mujoco.mj_step(model, data)
@@ -23,6 +33,15 @@ mujoco.mj_step(model, data)
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_headers=["*"])
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+
+robots = [
+    Sumobot(model, data, "A_", 0, 1, id_dohyo),
+    Sumobot(model, data, "B_", 2, 3, id_dohyo),
+]
+
+def controller():
+    for robot in robots:
+        robot.apply_control()
 
 def get_scene_description():
     scene = {"bodies": []}
@@ -65,42 +84,6 @@ def get_scene_description():
         scene["bodies"].append({"name": name, "geoms": geoms})
 
     return scene
-
-def read_sensors():
-    geomid = np.array([-1], dtype=np.int32)
-    down   = np.array([0.0, 0.0, -1.0])
-
-    mujoco.mj_ray(model, data, data.site_xpos[id_line_left], down, None, 1, -1, geomid)
-    line_left = (geomid[0] != id_dohyo)
-
-    mujoco.mj_ray(model, data, data.site_xpos[id_line_right], down, None, 1, -1, geomid)
-    line_right = (geomid[0] != id_dohyo)
-
-    rot     = data.site_xmat[id_front_ir].reshape(3, 3)
-    forward = -rot[:, 1]
-    dist_ir = mujoco.mj_ray(model, data, data.site_xpos[id_front_ir], forward, None, 1, -1, geomid)
-
-    return {
-        "line_left":  line_left,
-        "line_right": line_right,
-        "front_ir":   float(dist_ir),
-        "enemy":      (0 < dist_ir < 0.5)
-    }
-
-def controller():
-    s = read_sensors()
-    edge  = s["line_left"] or s["line_right"]
-    enemy = s["enemy"]
-
-    if edge:
-        data.ctrl[0] = -0.1
-        data.ctrl[1] = -0.1
-    elif enemy:
-        data.ctrl[0] =  2
-        data.ctrl[1] =  2
-    else:
-        data.ctrl[0] =  0.04
-        data.ctrl[1] = -0.04
 
 def get_state():
     bodies = {}
