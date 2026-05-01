@@ -12,5 +12,8 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "three": "^0.183.2"
+  }
 }

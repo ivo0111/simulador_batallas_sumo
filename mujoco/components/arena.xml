@@ -1,0 +1,30 @@
+<mujoco>
+
+    <default>
+        <!-- suelo -->
+        <default class="ground">
+            <geom friction="0.9 0.005 0.001" condim="4"/>
+        </default>
+    </default>
+
+    <asset>
+        <texture name="dohyo_tex"
+            type="2d"
+            file="../assets/dohyo.PNG" />
+        <material name="dohyo_mat"
+            texture="dohyo_tex"
+            texuniform="false" />
+    </asset>
+
+    <worldbody>
+        <body name="arena" pos="0 0 0.03">
+            <geom name="dohyo_surface"
+                type="cylinder"
+                size="0.77 0.025"
+                class="ground"
+                material="dohyo_mat" />
+        </body>
+
+    </worldbody>
+
+</mujoco>
