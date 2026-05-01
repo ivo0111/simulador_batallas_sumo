@@ -47,10 +47,10 @@ class Sumobot:
     def decide(self):
         s = self.read_sensors()
         if s["line_left"] or s["line_right"]:
-            return -0.1, -0.1
+            return -1, -1
         if s["enemy"]:
             return 2.0, 2.0
-        return 0.04, -0.04
+        return 0.5, -0.5
 
     def apply_control(self):
         left, right = self.decide()

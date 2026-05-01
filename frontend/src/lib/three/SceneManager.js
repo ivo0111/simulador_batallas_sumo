@@ -43,12 +43,11 @@ export class SceneManager {
         this._startLoop()
     }
 
-    _loadSTL(src, mat) {
-        const url = `http://localhost:8000${src}`
+    _loadSTL(src, mat, group) {
+        const url = `${src}`
         new STLLoader().load(url, geometry => {
             const mesh = new THREE.Mesh(geometry, mat)
-            const robotGroup = this.bodies.get('A_robot')
-            if (robotGroup) robotGroup.add(mesh)
+            group.add(mesh)
         })
     }
 
@@ -67,7 +66,7 @@ export class SceneManager {
         this.scene.add(mesh)
     }
 
-    _buildGeom(geom) {
+    _buildGeom(geom,group) {
         let mat
         let geo
 
@@ -113,7 +112,8 @@ export class SceneManager {
 
             case 'mesh':
                 // STL es asíncrono — lo manejamos aparte
-                this._loadSTL(geom.src, mat)
+                this._loadSTL(geom.src, mat, group)
+                console.log("Cargando STL:", geom.src)
                 return null
 
             default:
@@ -137,7 +137,7 @@ export class SceneManager {
 
             for (const geom of body.geoms) {
                 // pos y quat son relativos al body en MuJoCo
-                const mesh = this._buildGeom(geom)
+                const mesh = this._buildGeom(geom,group)
                 if (!mesh) continue
 
                 mesh.position.set(geom.pos[0], geom.pos[1], geom.pos[2])

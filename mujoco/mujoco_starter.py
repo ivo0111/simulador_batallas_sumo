@@ -59,6 +59,14 @@ def get_scene_description():
             if gtype == 0:  # ignorar planes
                 continue
 
+            mesh_name = None
+            mesh_file = None
+            if gtype == 7:  
+                mesh_id = model.geom_dataid[gid]
+                if mesh_id >= 0:
+                    mesh_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_MESH, mesh_id)
+                    mesh_file = str.split(mesh_name,'_')[1] + ".stl"
+
             gname  = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, gid)
             gsize  = model.geom_size[gid].tolist()
             gpos   = model.geom_pos[gid].tolist()
@@ -79,10 +87,10 @@ def get_scene_description():
                 "quat":     gquat,
                 "rgba":     rgba,
                 "material": mat_name,
+                "mesh_file": mesh_file,
             })
 
         scene["bodies"].append({"name": name, "geoms": geoms})
-
     return scene
 
 def get_state():

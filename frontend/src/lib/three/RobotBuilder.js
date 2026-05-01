@@ -40,7 +40,7 @@ function parseGeom(g) {
             return { ...base, type: "cylinder", size: g.size }
 
         case GeomType.MESH:
-            return { ...base, type: "mesh", src: `/assets/rampa.stl` }
+            return { ...base, type: "mesh", src: `http://localhost:8000/assets/${g.mesh_file}` }
 
         default:
             return { ...base, type: "unknown" }
