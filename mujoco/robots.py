@@ -2,17 +2,17 @@ import mujoco
 import numpy as np
 
 class Sumobot:
-    def __init__(self, model, data, prefix, left_ctrl_idx, right_ctrl_idx, id_dohyo):
+    def __init__(self, model, data, prefix, id_dohyo):
         self.model = model
         self.data = data
         self.prefix = prefix
-        self.left_ctrl_idx = left_ctrl_idx
-        self.right_ctrl_idx = right_ctrl_idx
         self.id_dohyo = id_dohyo
 
         self.site_left = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, prefix + "line_left")
         self.site_right = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, prefix + "line_right")
         self.site_front = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, prefix + "front_ir")
+        self.left_ctrl_idx  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, prefix + "robot_left")
+        self.right_ctrl_idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, prefix + "robot_right")
 
     def read_sensors(self):
         geomid = np.array([-1], dtype=np.int32)

@@ -15,12 +15,12 @@ data  = mujoco.MjData(model)
 
 #* IDs de sensores
 
-# Robot A
+# Sites Robot A
 A_id_line_left  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_line_left")
 A_id_line_right = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_line_right")
 A_id_front_ir   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "A_front_ir")
 
-# Robot B
+# Sites Robot B
 B_id_line_left  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "B_line_left")
 B_id_line_right = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "B_line_right")
 B_id_front_ir   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "B_front_ir")
@@ -35,8 +35,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allo
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 robots = [
-    Sumobot(model, data, "A_", 0, 1, id_dohyo),
-    Sumobot(model, data, "B_", 2, 3, id_dohyo),
+    Sumobot(model, data, "A_", id_dohyo),
+    Sumobot(model, data, "B_", id_dohyo),
 ]
 
 def controller():
