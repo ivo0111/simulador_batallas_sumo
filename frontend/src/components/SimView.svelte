@@ -4,6 +4,7 @@
     import { SceneManager } from "../lib/three/SceneManager.js";
     import { buildSceneDescription } from "../lib/three/RobotBuilder.js";
     import { get } from 'svelte/store'
+    import CodeUploader from "./CodeUploader.svelte";
 
     let canvas;
     let sceneManager;
@@ -34,15 +35,54 @@
         unsubscribeInit();
         unsubscribeSim();
     });
+
+    async function resetSim() {
+        await fetch("http://localhost:8000/sim/reset", { method: "POST" });
+    }
 </script>
 
-<!-- svelte-ignore element_invalid_self_closing_tag -->
-<canvas bind:this={canvas} />
+<div class="layout">
+    <canvas bind:this={canvas} ></canvas>
+    <div class="panel">
+        <CodeUploader robotId="A" color="#cc2200" />
+        <CodeUploader robotId="B" color="#0044cc" />
+        <button class="reset-btn" on:click={resetSim}>↺ Reiniciar</button>
+    </div>
+</div>
 
 <style>
     canvas {
+        flex: 1;
+        display: block;
         width: 100%;
         height: 100vh;
         display: block;
+    }
+    .layout {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+    }
+    .panel {
+        width: 220px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+        background: #111;
+    }
+    .reset-btn {
+        margin-top: auto;
+        padding: 0.6em;
+        background: #333;
+        color: white;
+        border: 1px solid #555;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1em;
+    }
+    .reset-btn:hover {
+        background: #444;
+        border-color: #888;
     }
 </style>

@@ -18,12 +18,12 @@
         <attach model="arena_model" body="arena" prefix="" />
 
         <!-- Robot A -->
-        <frame pos="0 0.4 0.11" euler="0 0 0">
+        <frame pos="0 0.6 0.11" euler="0 0 90">
             <attach model="robot_model" body="robot" prefix="A_"/>
         </frame>
 
         <!-- Robot B -->
-        <frame pos="0 -0.4 0.11" euler="0 0 180">
+        <frame pos="0 -0.6 0.11" euler="0 0 -90">
             <attach model="robot_model" body="robot" prefix="B_"/>
         </frame>
 

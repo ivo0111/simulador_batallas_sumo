@@ -1,11 +1,10 @@
 import mujoco
-import numpy as np
 import asyncio
 import json
 import time
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from robots import Sumobot
 
@@ -33,6 +32,7 @@ mujoco.mj_step(model, data)
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_headers=["*"])
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+active_ws: WebSocket = None  
 
 robots = [
     Sumobot(model, data, "A_", id_dohyo),
@@ -108,9 +108,48 @@ def get_state():
         "bodies": bodies,
     }
 
+def reset_sim():
+    """Reinicia el estado de la simulación a las posiciones iniciales."""
+    mujoco.mj_resetData(model, data)
+    mujoco.mj_step(model, data)
+
+
+@app.post("/sim/reset")
+async def reset():
+    mujoco.mj_resetData(model, data)
+    mujoco.mj_step(model, data)
+    if active_ws:
+        await active_ws.send_text(json.dumps({
+            "type": "SCENE_INIT",
+            "scene": get_scene_description()
+        }))
+    return {"ok": True}
+
+@app.post("/robot/{robot_id}/code")
+async def upload_code(robot_id: str, file: UploadFile = File(...)):
+    if robot_id not in ("A", "B"):
+        raise HTTPException(status_code=404, detail="Robot no encontrado")
+
+    code = (await file.read()).decode("utf-8")
+
+    # Buscamos el robot por su prefix
+    target = next((r for r in robots if r.prefix == f"{robot_id}_"), None)
+
+    try:
+        target.load_code(code)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except SyntaxError as e:
+        raise HTTPException(status_code=400, detail=f"Error de sintaxis: {e}")
+
+    reset_sim()
+    return {"ok": True, "robot": robot_id}
+
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
+    global active_ws
     await ws.accept()
+    active_ws = ws
     print("Cliente conectado")
 
     # Primer mensaje: descripción completa de la escena

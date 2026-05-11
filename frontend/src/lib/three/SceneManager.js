@@ -132,6 +132,7 @@ export class SceneManager {
     }
 
     buildBodies(sceneDescription) {
+        this.clearBodies()
         for (const body of sceneDescription) {
             const group = new THREE.Group()
 
@@ -166,5 +167,18 @@ export class SceneManager {
                 bodyData.quat[0]
             )
         }
-}
+    }
+    clearBodies() {
+        for (const group of this.bodies.values()) {
+            this.scene.remove(group)
+            // Liberar memoria de geometrías y materiales
+            group.traverse(obj => {
+                if (obj.isMesh) {
+                    obj.geometry.dispose()
+                    obj.material.dispose()
+                }
+            })
+        }
+        this.bodies.clear()
+    }
 }
