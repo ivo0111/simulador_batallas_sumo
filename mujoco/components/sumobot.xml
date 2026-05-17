@@ -38,7 +38,7 @@
             <geom name="robot_body"
                 class="robot_body"
                 type="box"
-                size="0.1 0.1 0.05"
+                size="0.07 0.1 0.05"
                 rgba="0.667 0 0 1" />
 
             <!-- Rampa (mesh STL) -->
@@ -49,7 +49,7 @@
                 rgba="0.4 0.4 0.4 1" />
 
             <!-- Rueda izquierda -->
-            <body name="robot_wheel_left" pos="0.115 0.1 -0.01">
+            <body name="robot_wheel_left" pos="0.085 0.1 -0.01">
                 <joint name="robot_left_wheel_joint"
                     type="hinge"
                     axis="1 0 0"
@@ -61,7 +61,7 @@
             </body>
 
             <!-- Rueda derecha -->
-            <body name="robot_wheel_right" pos="-0.115 0.09 -0.01">
+            <body name="robot_wheel_right" pos="-0.085 0.09 -0.01">
                 <joint name="robot_right_wheel_joint"
                     type="hinge"
                     axis="1 0 0"

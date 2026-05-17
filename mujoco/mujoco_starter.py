@@ -109,13 +109,15 @@ def get_state():
     }
 
 def reset_sim():
-    """Reinicia el estado de la simulación a las posiciones iniciales."""
+    """Resetea el estado de MuJoCo y re-instancia los comportamientos."""
+    for robot in robots:
+        robot.reset()                    # <-- re-instancia la clase Robot
     mujoco.mj_resetData(model, data)
     mujoco.mj_step(model, data)
 
-
 @app.post("/sim/reset")
 async def reset():
+    reset_sim()
     mujoco.mj_resetData(model, data)
     mujoco.mj_step(model, data)
     if active_ws:

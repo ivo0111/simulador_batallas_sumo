@@ -1,15 +1,17 @@
 import mujoco
 import numpy as np
-import importlib.util
-import sys
 
 DEFAULT_BEHAVIOR = """
-def decide(sensors):
-    if sensors["line_left"] or sensors["line_right"]:
-        return -1, -1
-    if sensors["enemy"]:
-        return 2.0, 2.0
-    return 0.5, -0.5
+class Robot:
+    def __init__(self):
+        self.ticks = 0
+
+    def decide(self, sensors):
+        if sensors["line_left"] or sensors["line_right"]:
+            return -1, -1
+        if sensors["enemy"]:
+            return 2.0, 2.0
+        return 0.5, -0.5
 """
 
 class Sumobot:
@@ -25,25 +27,34 @@ class Sumobot:
         self.left_ctrl_idx  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, prefix + "robot_left")
         self.right_ctrl_idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, prefix + "robot_right")
 
-        # Cargamos el comportamiento por defecto
-        self._decide_fn = self._load_default()
+        # Guardamos la clase (no la instancia) para poder re-instanciar en reset()
+        self._robot_class    = self._load_default_class()
+        self._robot_instance = self._robot_class()
 
-    def _load_default(self):
-        """Crea una función decide() desde el comportamiento hardcodeado."""
+    def _load_default_class(self):
+        """Devuelve la clase Robot del comportamiento por defecto."""
         ns = {}
         exec(DEFAULT_BEHAVIOR, ns)
-        return ns["decide"]
+        return ns["Robot"]
 
     def load_code(self, code: str):
         """
-        Recibe código Python como string, lo valida y reemplaza
-        la función decide(). Lanza ValueError si no define 'decide'.
+        Compila el código, guarda la clase Robot y crea una instancia fresca.
+        Lanza ValueError si no define 'Robot'.
         """
         ns = {}
         exec(compile(code, "<robot_code>", "exec"), ns)
-        if "decide" not in ns:
-            raise ValueError("El código debe definir una función 'decide(sensors)'")
-        self._decide_fn = ns["decide"]
+        if "Robot" not in ns:
+            raise ValueError("El código debe definir una clase 'Robot' con un método 'decide(self, sensors)'")
+        self._robot_class    = ns["Robot"]
+        self._robot_instance = self._robot_class()
+
+    def reset(self):
+        """
+        Re-instancia la clase Robot activa, reseteando todo su estado interno.
+        Se llama desde el endpoint /sim/reset antes de resetear MuJoCo.
+        """
+        self._robot_instance = self._robot_class()
 
     def read_sensors(self):
         geomid = np.array([-1], dtype=np.int32)
@@ -73,7 +84,7 @@ class Sumobot:
     def decide(self):
         sensors = self.read_sensors()
         try:
-            result = self._decide_fn(sensors)
+            result = self._robot_instance.decide(sensors)
             left, right = float(result[0]), float(result[1])
         except Exception as e:
             print(f"[{self.prefix}] Error en decide(): {e}")
