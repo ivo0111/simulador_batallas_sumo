@@ -73,6 +73,7 @@
             </body>
 
             <!-- Patín delantero (rueda libre omnidireccional) -->
+            
             <body name="robot_caster" pos="0 -0.1 -0.05">
                 <joint name="robot_caster_joint" type="ball" damping="0.001" />
                 <geom type="sphere"

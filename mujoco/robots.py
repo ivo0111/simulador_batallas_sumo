@@ -1,3 +1,5 @@
+from turtle import forward
+
 import mujoco
 import numpy as np
 
@@ -20,6 +22,9 @@ class Sumobot:
         self.data = data
         self.prefix = prefix
         self.id_dohyo = id_dohyo
+        self._sensor_cache = {"line_left": False, "line_right": False, "front_ir": -1.0, "enemy": False}
+        self._sensor_tick = 0
+        self.SENSOR_INTERVAL = 10  # leer sensores cada 10 steps (~100 Hz)
 
         self.site_left      = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, prefix + "line_left")
         self.site_right     = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, prefix + "line_right")
@@ -30,6 +35,38 @@ class Sumobot:
         # Guardamos la clase (no la instancia) para poder re-instanciar en reset()
         self._robot_class    = self._load_default_class()
         self._robot_instance = self._robot_class()
+
+    def _cone_sensor(self, site_id, half_angle_deg=15, num_rays=7):
+        """
+        Simula un sensor de proximidad cónico.
+        Devuelve la distancia mínima detectada (-1 si ningún rayo impacta).
+        """
+        rot = self.data.site_xmat[site_id].reshape(3, 3)
+        forward = -rot[:, 1]
+        up      =  rot[:, 2]
+
+        origin = self.data.site_xpos[site_id]
+        half_angle = np.radians(half_angle_deg)
+        angles = np.linspace(-half_angle, half_angle, num_rays)
+
+        min_dist = -1.0
+        geomid = np.array([-1], dtype=np.int32)
+
+        for angle in angles:
+            # Rotamos el vector forward alrededor de 'up' en cada ángulo
+            # Usamos la fórmula de Rodrigues: v' = v·cos(θ) + (up×v)·sin(θ)
+            direction = (forward * np.cos(angle)
+                        + np.cross(up, forward) * np.sin(angle))
+            direction /= np.linalg.norm(direction)  # normalizar por las dudas
+
+            dist = mujoco.mj_ray(self.model, self.data,
+                                origin, direction, None, 1, -1, geomid)
+
+            if dist > 0:  # -1 significa que no impactó nada
+                if min_dist < 0 or dist < min_dist:
+                    min_dist = dist
+
+        return min_dist
 
     def _load_default_class(self):
         """Devuelve la clase Robot del comportamiento por defecto."""
@@ -57,8 +94,12 @@ class Sumobot:
         self._robot_instance = self._robot_class()
 
     def read_sensors(self):
+        self._sensor_tick += 1
+        if self._sensor_tick % self.SENSOR_INTERVAL != 0:
+            return self._sensor_cache
+        
         geomid = np.array([-1], dtype=np.int32)
-        down   = np.array([0.0, 0.0, -1.0])
+        down = np.array([0.0, 0.0, -1.0])
 
         mujoco.mj_ray(self.model, self.data,
                     self.data.site_xpos[self.site_left], down, None, 1, -1, geomid)
@@ -68,18 +109,19 @@ class Sumobot:
                     self.data.site_xpos[self.site_right], down, None, 1, -1, geomid)
         line_right = (geomid[0] != self.id_dohyo)
 
-        rot     = self.data.site_xmat[self.site_front].reshape(3, 3)
-        forward = -rot[:, 1]
-        dist_ir = mujoco.mj_ray(self.model, self.data,
-                                self.data.site_xpos[self.site_front],
-                                forward, None, 1, -1, geomid)
-
-        return {
-            "line_left":  line_left,
-            "line_right": line_right,
-            "front_ir":   float(dist_ir),
-            "enemy":      (0 < dist_ir < 0.9),
-        }
+        #rot = self.data.site_xmat[self.site_front].reshape(3, 3)
+        #forward = -rot[:, 1]
+        #dist_ir = mujoco.mj_ray(self.model, self.data,
+        #                        self.data.site_xpos[self.site_front],
+        #                        forward, None, 1, -1, geomid)
+        dist_ir = self._cone_sensor(self.site_front, half_angle_deg=20, num_rays=9)
+        self._sensor_cache = {
+                    "line_left":  line_left,
+                    "line_right": line_right,
+                    "front_ir":   float(dist_ir),
+                    "enemy":      (0 < dist_ir < 0.9),
+                }
+        return self._sensor_cache
 
     def decide(self):
         sensors = self.read_sensors()
